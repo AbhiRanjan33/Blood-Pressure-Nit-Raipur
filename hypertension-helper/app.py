@@ -170,7 +170,7 @@ CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000"])  # ← ADD
 
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
-    raise ValueError("GEMINI_API_KEY not found in .env file. Please add it.")
+    raise ValueError("❌ GEMINI_API_KEY not found in .env file. Please add it.")
 
 genai.configure(api_key=api_key)
 
@@ -179,7 +179,11 @@ try:
     with open("bp-rules.txt", "r", encoding="utf-8") as f:
         RULES_DOCUMENT = f.read()
 except FileNotFoundError:
+<<<<<<< HEAD
     raise FileNotFoundError("bp-rules.txt not found in directory. Please add it.")
+=======
+    raise FileNotFoundError("❌ bp-rules.txt not found in directory. Please add it.")
+>>>>>>> fa630322b942f62cc0bfd408673a3b8645b1229e
 
 
 # --- Model 1: Medication Classifier ---
@@ -252,11 +256,19 @@ def classify_medications(med_text):
             return []
         return [s.strip().upper() for s in api_response.split(",") if s.strip()]
     except Exception as e:
+<<<<<<< HEAD
         print(f"Error in medication classification: {e}")
+=======
+        print(f"⚠️ Error in medication classification: {e}")
+>>>>>>> fa630322b942f62cc0bfd408673a3b8645b1229e
         return []
 
 
 def get_recommendation(inputs, htn_grade, classified_meds):
+<<<<<<< HEAD
+=======
+    """Ask Gemini for recommendation based on patient details."""
+>>>>>>> fa630322b942f62cc0bfd408673a3b8645b1229e
     medication_list = ", ".join(classified_meds) if classified_meds else "None"
     patient_status = "Existing Patient" if classified_meds else "New Patient"
 
@@ -279,7 +291,7 @@ RULES DOCUMENT:
         result = response.text.strip() if response and response.text else "N/A"
         return result if result else "N/A"
     except Exception as e:
-        print(f"Error in recommendation generation: {e}")
+        print(f"⚠️ Error in recommendation generation: {e}")
         raise RuntimeError(f"Failed to get recommendation: {e}")
 
 
@@ -312,6 +324,10 @@ def handle_recommendation():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     print("BP Advisor API Running → http://127.0.0.1:5050")
     print("CORS enabled for localhost:3000")
     app.run(debug=True, host="127.0.0.1", port=5050)
+=======
+    app.run(debug=True, host="0.0.0.0", port=5000)
+>>>>>>> fa630322b942f62cc0bfd408673a3b8645b1229e
