@@ -1,0 +1,655 @@
+Part 1: General Hypertension Treatment Rules (Riders)
+Target Blood Pressure Guidelines
+Age 18-64: Target office BP < 130/80
+
+Age 65-79: Target office BP < 140/80
+
+Age > 80: Target office systolic BP 140-150
+
+
+
+
+
+Treatment Protocols (Riders)
+Rule (Rider) ID: 1
+
+IF: HTN Grade: Gr I; Patient Status: New
+
+THEN (Action): CCB/ACEI/ARB
+
+RECOMMENDATION (Output): Amlodipine 5 or Telmisartan 40 or Ramipril 5
+
+Rule (Rider) ID: 2
+
+IF: HTN Grade: Gr II-III; Patient Status: New
+
+THEN (Action): CCB+ARB or CCB+ACEI or ARB+Diuretic or ACEI+Diuretic
+
+RECOMMENDATION (Output): Amlodipine 5+Telmisartan 40 or Amlodipine 5+Ramipril 5 or Telmisartan 40+Chlorthalidone 6.25 or Telmisartan 40 +Hydrochlorthiazide 12.5 or Ramipril 2.5 +Hydrochlorthiazide 12.5
+
+Rule (Rider) ID: 3
+
+IF: HTN Grade: Gr I -II
+
+THEN (Action): add ARB or ACEI
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5
+
+Rule (Rider) ID: 4
+
+IF: HTN Grade: Gr I-II
+
+THEN (Action): Add CCB or Diuretic
+
+RECOMMENDATION (Output): Ramipril 5 + Amlodipine 5 OR Chlorthalidone 6.25 Or Telmisartan 40+Amlodipine 5 or Chlorthalidone 6.25 or Hydrochlorthiazide 12.5
+
+Rule (Rider) ID: 5
+
+IF: HTN Grade: Gr I-II; Current Meds: Diuretics (y)
+
+THEN (Action): add ARB or ACEI
+
+RECOMMENDATION (Output): Chlorthalidone 6.25 +Telmisartan 40 OR Ramipril 5
+
+Rule (Rider) ID: 6
+
+IF: HTN Grade: Gr I-II; Current Meds: BB (y)
+
+THEN (Action): add CCB
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5
+
+Rule (Rider) ID: 7
+
+IF: HTN Grade: Gr III; Current Meds: CCB (y)
+
+THEN (Action): Add ARB or ACEI +Diuretics
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 +Chlorthalidone 6.25
+
+Rule (Rider) ID: 8
+
+IF: HTN Grade: Gr III; Current Meds: RASI (y)
+
+THEN (Action): Add CCB +Diuretics
+
+RECOMMENDATION (Output): Amlodipine 5 + Ramipril 5 or telmisartan 40 +Chlorthalidone 6.25
+
+ADVERSE EFFECT/CORRECTION: If Hyponatremia stop diuretc and increase the dose of Amodipine by 5 mg
+
+Rule (Rider) ID: 9
+
+IF: HTN Grade: Gr III; Current Meds: Diuretics (y)
+
+THEN (Action): Add CCB + ARB or ACEI
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 +Chlorthalidone 6.25
+
+ADVERSE EFFECT/CORRECTION: If rise in creatinine more than 50% of base line then stop ARB or ACEI and increase the dose of Amodipine by 5 mg
+
+Rule (Rider) ID: 10
+
+IF: HTN Grade: Gr III; Current Meds: BB (y)
+
+THEN (Action): Add Diuretic +ARB or ACEI
+
+RECOMMENDATION (Output): Hydrochlorthoazide 12.5 +Telmisartan 40 OR Ramipril 5 +Metoprolol 50
+
+ADVERSE EFFECT/CORRECTION: Other option Here we can add CCB in palce of Diuretics or RASI = Means combination of CCB+RASI or CCB + diuretc along with BB
+
+Rule (Rider) ID: 11
+
+IF: HTN Grade: Gr I
+
+THEN (Action): add CCB half
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Amlodipine 2.5
+
+Rule (Rider) ID: 12
+
+IF: HTN Grade: Gr I
+
+THEN (Action): Add Full dose of RASI
+
+RECOMMENDATION (Output): Temisartan 40 or Ramipril 5 + Amlodipine 5 + Chlorthalidone 6.25 or Hydrochlorthiazide 12.5+Telmisartan 40 Or Ramipril 5
+
+ADVERSE EFFECT/CORRECTION: Other option Here we can add CCB in palce of RASI = Means combination of CCB+RASI + diuretc +CCB
+
+Rule (Rider) ID: 13
+
+IF: HTN Grade: Gr I; Current Meds: Diuretics (y)
+
+THEN (Action): add Half dose of CCB
+
+RECOMMENDATION (Output): Chlorthalidone 6.25 +Telmisartan 40 OR Ramipril 5 + Amlodipine 2.5
+
+Rule (Rider) ID: 14
+
+IF: HTN Grade: Gr I-; Current Meds: BB (y)
+
+THEN (Action): Add half dose of ACEI or ARB
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5 + Ramipril 2.5 or Telmisartan 20
+
+Rule (Rider) ID: 15
+
+IF: HTN Grade: Gr II-III
+
+THEN (Action): Add Diuretic
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25
+
+Rule (Rider) ID: 16
+
+IF: HTN Grade: Gr II-III
+
+THEN (Action): Add CCB or RASI
+
+RECOMMENDATION (Output): Telmisartan 40 Or Ramipril 5 + Amlodipine 5 + Chlorthalidone 6.25 +Telmisartan 40 or Ramipril 5 or Amlodipine 5
+
+Rule (Rider) ID: 17
+
+IF: HTN Grade: Gr II-III; Current Meds: Diuretics (y)
+
+THEN (Action): Add CCB
+
+RECOMMENDATION (Output): Chlorthalidone 6.25 +Telmisartan 40 OR Ramipril 5 + Amlodipine 5
+
+Rule (Rider) ID: 18
+
+IF: HTN Grade: Gr II-III; Current Meds: BB (y)
+
+THEN (Action): Add ARB/ACEI
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5 + Ramipril 5 or Telmisartan 40
+
+ADVERSE EFFECT/CORRECTION: Other option Here we can add diuretic in palce of RASI = Means combination of CCB+ diuretc +BB
+
+Rule (Rider) ID: 19
+
+IF: HTN Grade: Gr I
+
+THEN (Action): add CCB half
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Amlodipine 5
+
+Rule (Rider) ID: 20
+
+IF: HTN Grade: Gr I
+
+THEN (Action): add CCB half
+
+RECOMMENDATION (Output): Ramipril 5 + Amlodipine 5 + Chlorthalidone 6.25 + Amlodipine 2.5 Or Telmisartan 40+Amlodipine 5 + Chlorthalidone 6.25 or Hydrochlorthiazide 12.5 + Amlodipine 2.5
+
+Rule (Rider) ID: 21
+
+IF: HTN Grade: Gr I; Current Meds: Diuretics (y)
+
+THEN (Action): add full dose of ARB or ACEI
+
+RECOMMENDATION (Output): Chlorthalidone 6.25 +Telmisartan 40 or Ramipril 5 + Amlodipine 5 + Telmisartan 40 or Ramipril 5
+
+ADVERSE EFFECT/CORRECTION: rider 20 and 21 are two options for same problem
+
+Rule (Rider) ID: 22
+
+IF: HTN Grade: Gr I-; Current Meds: BB (y)
+
+THEN (Action): Add half dose of ACEI or ARB
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5 + Ramipril 5 or Telmisartan 40
+
+Rule (Rider) ID: 23
+
+IF: HTN Grade: Gr I
+
+THEN (Action): Add Half CCB
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 2.5 + Amlodipine 2.5
+
+Rule (Rider) ID: 24
+
+IF: HTN Grade: Gr I
+
+THEN (Action): Add Half RASI
+
+RECOMMENDATION (Output): Ramipril 5 + Amlodipine 5 + Chlorthalidone 6.25 + Ramipril 5 Telmisartan 40+Amlodipine 5 + Chlorthalidone 6.25 or Hydrochlorthiazide 12.5 + Telmisartan 40
+
+Rule (Rider) ID: 25
+
+IF: HTN Grade: Gr I; Current Meds: Diuretics (y)
+
+THEN (Action): Add Half dose RASI
+
+RECOMMENDATION (Output): Amlodipine 5 + Chlorthalidone 6.25 +Telmisartan 40 OR Ramipril 5 + Amlodipine 5 + Ramipril 2.5 or Telmisartan 20
+
+Rule (Rider) ID: 26
+
+IF: HTN Grade: Gr I; Current Meds: BB (y)
+
+THEN (Action): Diuretic
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Chlorthalidone 6.25
+
+Rule (Rider) ID: 27
+
+IF: HTN Grade: Gr II-III
+
+THEN (Action): Add CCB + ACEI or ARB
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Ramipril 5 or Telmisartan 40
+
+Rule (Rider) ID: 28
+
+IF: HTN Grade: Gr II-III
+
+THEN (Action): CCB
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Ramipril 5 or Telmisartan 40
+
+Rule (Rider) ID: 29
+
+IF: HTN Grade: Gr II-III; Current Meds: Diuretics (y)
+
+THEN (Action): Add BB
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Nebivolol 5 or Bisoprolol 5
+
+Rule (Rider) ID: 30
+
+IF: HTN Grade: Gr II-III; Current Meds: BB (y)
+
+THEN (Action): Diuretic + ACEI or ARB
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Chlorthalidone 6.25 + Ramipril 5 or Telmisartan 40
+
+Rule (Rider) ID: 31
+
+IF: HTN Grade: Gr I
+
+THEN (Action): ADD BB
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Nebivolol 2.5
+
+Rule (Rider) ID: 32
+
+IF: HTN Grade: Gr I
+
+THEN (Action): ADD Half CCB and RASI
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Ramipril 5 or Telmisartan 40
+
+Rule (Rider) ID: 33
+
+IF: HTN Grade: Gr I; Current Meds: Diuretics (y)
+
+THEN (Action): ADD BB
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Nebivolol 2.5
+
+Rule (Rider) ID: 34
+
+IF: HTN Grade: Gr I; Current Meds: BB (y)
+
+THEN (Action): Add Half CCB
+
+RECOMMENDATION (Output): Nebivolol 5 or Bisoprolol 5 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Chlorthalidone 6.25 + Ramipril 5 or Telmisartan 40 + Amlodipine 2.5
+
+Rule (Rider) ID: 35
+
+IF: HTN Grade: Gr II-III
+
+THEN (Action): Add MRA
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Spironolactone 12.5
+
+Rule (Rider) ID: 38
+
+IF: HTN Grade: Gr II-III; Current Meds: BB (y)
+
+THEN (Action): Add MRA
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Chlorthalidone 6.25 + Ramipril or Telmisartan + Spironolactone 12.5
+
+Rule (Rider) ID: 39
+
+IF: HTN Grade: Gr I
+
+THEN (Action): Add BB
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Spironolactone 12.5 + Nebivolol 2.5
+
+Rule (Rider) ID: 40
+
+IF: HTN Grade: Gr I; Current Meds: BB (y)
+
+THEN (Action): Add CCB
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Chlorthalidone 6.25 + Ramipril or Telmisartan + Spironolactone 12.5 +Amlodipine 5
+
+Rule (Rider) ID: 41
+
+IF: HTN Grade: Gr II-III
+
+THEN (Action): Add AB and increase the dose of BB
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Spironolactone 12.5 + Nebivolol 5 + Prazosin XL 2.5
+
+Rule (Rider) ID: 43
+
+IF: HTN Grade: Gr I
+
+THEN (Action): Add AB and increase the dose of BB
+
+RECOMMENDATION (Output): Amlodipine 5 +Telmisartan 40 OR Ramipril 5 + Hydrochlorthiazide 12.5 or Chlorthalidone 6.25 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Spironolactone 12.5 + Nebivolol 5 + Prazosin XL 2.5 + Prazosin XL 2.5
+
+Rule (Rider) ID: 44
+
+IF: HTN Grade: Gr II-III; Current Meds: BB (y)
+
+THEN (Action): Add CA and increase the dose of BB
+
+RECOMMENDATION (Output): Nebivolol 5 + Amlodipine 5 + Ramipril 5 or Telmisartan 40 + Chlorthalidone 6.25 + Ramipril or Telmisartan + Spironolactone 12.5 +Amlodipine 5 + Prazosin XL 2.5 + Clonidine 0.1 mg twice a day
+
+Special Rule (LVEF):
+
+IF: Patient's LVEF is 49% or less
+
+THEN: In RASI group, suggest ARNI (starting dose 50 mg twice a day and gradually uptitrate to at least 100 mg).
+
+
+
+
+
+
+
+Part 2: CKD Patient Hypertension Treatment Rules
+Rule ID: K-1
+
+IF: HTN Grade: Gr I; Patient Status: New
+
+THEN (Action): CCB
+
+RECOMMENDATION (Output): Amlodipine 5
+
+Rule ID: K-2
+
+IF: HTN Grade: Gr II; Patient Status: New
+
+THEN (Action): CCB+Diuretic
+
+RECOMMENDATION (Output): Amlodipine 5+ +Hydrochlorthiazide 12.5
+
+Rule ID: K-3
+
+IF: HTN Grade: Gr III; Patient Status: New
+
+THEN (Action): CCB+ARB + diuretics or CCB+ACEI + diuretics
+
+RECOMMENDATION (Output): Amlodipine 5+Telmisartan 40+Chlorthalidone 6.25 or Amlodipine 5+Telmisartan 40+Hydrochlorthiazide 12.5 or Amlodipine 5+Ramipril 5+Hydrochlorthiazide 12.5
+
+Rule ID: K-4
+
+IF: HTN Grade: Gr I -II; Current Meds: CCB (y)
+
+THEN (Action): Diuretic
+
+RECOMMENDATION (Output): Amlodipine 5 +Hydrochlorthazide 12.5
+
+Rule ID: K-5
+
+IF:
+
+RECOMMENDATION (Output): Telmisartan 40 + Amlodipine 5 OR Chlorthalidone 6.25
+
+Rule ID: K-6
+
+IF: HTN Grade: Gr I-II; Current Meds: Diuretics (y)
+
+THEN (Action): CCB
+
+RECOMMENDATION (Output): Chlorthalidone 6.25 + CCB
+
+Rule ID: K-7
+
+IF: HTN Grade: Gr I-II; Current Meds: BB (y)
+
+THEN (Action): add CCB
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5
+
+Rule ID: K-8
+
+IF: HTN Grade: Gr III; Current Meds: CCB (y)
+
+THEN (Action): CCB +Diuretics
+
+RECOMMENDATION (Output): Amlodipine 5 +Chlorthalidone 6.25 + CCB
+
+Rule ID: K-9
+
+IF: HTN Grade: Gr III; Current Meds: Diuretics (y)
+
+THEN (Action): Add CCB + CCB
+
+RECOMMENDATION (Output): Amlodipine 5 +Chlorthalidone 6.25 + CCB
+
+Rule ID: K-10
+
+IF: HTN Grade: Gr III; Current Meds: BB (y)
+
+THEN (Action): Add CCB + Diuretic
+
+RECOMMENDATION (Output): Amlodipine 5 +Hydrochlorthiazide 12.5 +Metoprolol 50
+
+Rule ID: K-11
+
+IF: HTN Grade: Gr I -II; Current Meds: CCB (y)
+
+THEN (Action): CCB
+
+RECOMMENDATION (Output): Amlodipine 5 +Hydrochlorthazide 12.5 + Amlodipine 5
+
+Rule ID: K-12
+
+IF: HTN Grade: Gr I-II; Current Meds: BB (y)
+
+THEN (Action): Diuretic
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5 +Hydrochlorthiazide 12.5
+
+Rule ID: K-13
+
+IF: HTN Grade: Gr III; Current Meds: CCB (y); Other Conditions: ON Extra: CCB
+
+THEN (Action): BB + CA
+
+RECOMMENDATION (Output): Amlodipine 5 +Chlorthalidone 6.25 + Amlodipine 5 + Clonidine 0.1 1/2 twice a day
+
+Rule ID: K-14
+
+IF: HTN Grade: Gr III; Current Meds: BB (y); Other Conditions: ON Extra: BB
+
+THEN (Action): CCB + AB
+
+RECOMMENDATION (Output): Amlodipine 5 +Hydrochlorthiazide 12.5 +Metoprolol 50 + Amlodipine 5 + Metoprolol 50 + Prozosin 5
+
+Rule ID: K-15
+
+IF: HTN Grade: Gr I -II; Current Meds: CCB (y); Other Conditions: ON Extra: CCB
+
+THEN (Action): AB
+
+RECOMMENDATION (Output): Amlodipine 5 +Hydrochlorthazide 12.5 + Amlodipine 5 + Prazoson 5
+
+Rule ID: K-16
+
+IF: HTN Grade: Gr I-II; Current Meds: Diuretics (y); Other Conditions: ON Extra: CCB
+
+THEN (Action): AB
+
+RECOMMENDATION (Output): Chlorthalidone 6.25 + Amlodipine 5 + Amlodipine 5 + Prazosin 5
+
+Rule ID: K-17
+
+IF: HTN Grade: Gr I-II; Current Meds: BB (y)
+
+THEN (Action): CCB
+
+RECOMMENDATION (Output): Metoprolol XL 50 + Amlodipine 5 +Hydrochlorthiazide 12.5 + CCB
+
+Rule ID: K-18
+
+IF: HTN Grade: Gr III; Current Meds: CCB (y); Other Conditions: ON Extra: CCB
+
+THEN (Action): AB + Increase CA
+
+RECOMMENDATION (Output): Amlodipine 5 +Chlorthalidone 6.25 + Amlodipine 5 + Clonidine 0.1 twice a day + Prazosin 5
+
+Rule ID: K-19
+
+IF: HTN Grade: Gr III; Current Meds: BB (y); Other Conditions: ON Extra: CCB, ON Extra: BB, ON Extra: AB
+
+THEN (Action): CA + AB
+
+RECOMMENDATION (Output): Amlodipine 5 +Hydrochlorthiazide 12.5 +Metoprolol 50 + Amlodipine 5 + Metoprolol 50 + Prozosin 5 + Clonidine 0.1 twice a day + Prazosin 5
+
+
+
+
+
+
+
+
+
+
+
+Part 3: Maximum Dosage Rules (Constraints)
+(Note: Doses are in mg)
+
+CCB / MRA / Diuretics / Other
+Amlodipine: 10
+
+Benidipine: 8
+
+Cilnidipine: 20
+
+Nifedipine. XL: 120
+
+Eplerenone: 50
+
+Spironolactone: 100
+
+Hydrochlorothiazide: 50
+
+TORSEMIDE: 40
+
+FUROSEMIDE: 80
+
+Amlodipine: 10
+
+Benidipine: 8
+
+Cilnidipine: 20
+
+Efonidipine: 40
+
+Diltiazem: 120
+
+Verapamil: 320
+
+Eplerenone: 100
+
+Spironolactone: 100
+
+Chlorthalidone: 25
+
+Hydrochlorothiazide: 25
+
+TORSEMIDE: 80
+
+FUROSEMIDE: 80
+
+Azilsartan: 80
+
+Candesartan: 16
+
+Irbesartan: 300
+
+Losartan: 100
+
+olmesartan: 40
+
+Telmisartan: 80
+
+Valsartan: 320
+
+Valsartan +Sacubitril: 400
+
+Enalapril: 40
+
+Lisinoipril: 40
+
+Perindopril: 16
+
+Ramipril: 20
+
+Atenolol: 100
+
+Metoprolol: 400
+
+S-Metoprolol: 50
+
+Bisoprolol: 20
+
+Nebivolol: 20
+
+Carvidilol. (alpha + Beta): 50
+
+Labetolol (alpha + Beta): 2400
+
+Prazosin: 10
+
+Methyldopa: 1000
+
+RASI (Renin-Angiotensin System Inhibitors)
+Azilsartan: 80.0
+
+Candesartan: 32.0
+
+Losartan: 100.0
+
+olmesartan: 40.0
+
+Telmisartan: 80.0
+
+Valsartan: 320.0
+
+Valsartan +Sacubitril: 400.0
+
+Enalapril: 40.0
+
+Lisinoipril: 40.0
+
+Perindopril: 16.0
+
+Ramipril: 20.0
+
+Beta Blockers
+Atenolol: 100.0
+
+Metoprolol: 400.0
+
+Bisoprolol: 20.0
+
+Nebivolol: 20.0
+
+Carvidilol. (alpha + Beta): 50.0
+
+Labetolol (alpha + Beta): 2400.0
+
+Clonidine: 2.4
+
+Methyldopa: 1000.0
+
+End of Rules Document.
