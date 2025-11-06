@@ -16,10 +16,6 @@ Run (dev):
 Endpoints:
     POST /search        -> {"query": "paracetamol 500 mg"}
     POST /search_bulk   -> {"queries": ["paracetamol 500 mg", "ibuprofen 200 mg"]}
-
-Notes:
-    - If SERPAPI_API_KEY is set, the API uses SerpAPI's Google Shopping engine for rich offers.
-    - Otherwise it falls back to Google Custom Search JSON API and parses snippets for price hints.
 """
 
 from __future__ import annotations
@@ -30,8 +26,28 @@ from typing import List, Optional, Dict, Any
 
 import httpx
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware  # ← ADD THIS
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
+
+# ------------------------
+# CORS FIX - ALLOW NEXT.JS (localhost:3000)
+# ------------------------
+app = FastAPI(title="AI Medicine Web Search API", version="1.0.0")
+
+# ADD THIS BLOCK - CORS MIDDLEWARE
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        # Add your production domain later:
+        # "https://yourapp.com",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows POST, GET, OPTIONS
+    allow_headers=["*"],
+)
 
 # ------------------------
 # Config
@@ -140,7 +156,6 @@ async def search_serpapi_shopping(query: str) -> List[Offer]:
         elif isinstance(price_str, str):
             price_val, currency = parse_price(price_str)
         if not currency:
-            # Guess INR for India market
             currency = "INR"
         if link:
             offers.append(Offer(title=title, price=price_val, currency=currency, seller=store, link=link, source="serpapi"))
@@ -190,25 +205,22 @@ async def aggregate_offers(query: str) -> SearchResponse:
     serpapi_offers = await search_serpapi_shopping(query)
     cse_offers = await search_google_cse(query)
     offers.extend(serpapi_offers)
-    # Deduplicate by link
     seen: set[str] = set()
+    unique_offers = []
     for o in offers:
-        if o.link in seen:
-            continue
-        seen.add(o.link)
+        if o.link not in seen:
+            unique_offers.append(o)
+            seen.add(o.link)
     for o in cse_offers:
-        if o.link in seen:
-            continue
-        offers.append(o)
-        seen.add(o.link)
-    best = choose_best(offers)
-    return SearchResponse(query=query, best_offer=best, offers=offers)
+        if o.link not in seen:
+            unique_offers.append(o)
+            seen.add(o.link)
+    best = choose_best(unique_offers)
+    return SearchResponse(query=query, best_offer=best, offers=unique_offers)
 
 # ------------------------
 # API
 # ------------------------
-app = FastAPI(title="AI Medicine Web Search API", version="1.0.0")
-
 @app.post("/search", response_model=SearchResponse)
 async def search(body: QueryBody):
     if not (SERPAPI_API_KEY or (GOOGLE_API_KEY and GOOGLE_CX)):

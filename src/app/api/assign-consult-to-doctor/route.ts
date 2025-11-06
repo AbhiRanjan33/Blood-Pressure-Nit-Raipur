@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing data' }, { status: 400 });
     }
 
-    // 1. Get patient
+    // 1. Get patient + profile
     const patient = await User.findOne({ clerkId: patientClerkId });
     if (!patient || patient.role !== 'patient') {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
 
     const patientName = patient.profile?.name || 'Unknown Patient';
     const patientAge = patient.profile?.age || null;
+    const hasCKD = patient.profile?.chronic_kidney_disease === 'yes'; // ← NEW: Extract CKD
 
     // 2. Get doctor
     const doctor = await User.findById(doctorId);
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
     }
 
-    // 3. Push enhanced request with patientId
+    // 3. Push enhanced request with CKD
     doctor.consultRequests.push({
       ...consultRequest.toObject(),
       _id: new mongoose.Types.ObjectId(),
@@ -41,7 +42,8 @@ export async function POST(req: NextRequest) {
       status: 'pending',
       patientName,
       patientAge,
-      patientId: patient._id, // ← THIS IS THE KEY
+      patientId: patient._id,
+      hasCKD, // ← SENT TO DOCTOR SIDE
     });
 
     await doctor.save();

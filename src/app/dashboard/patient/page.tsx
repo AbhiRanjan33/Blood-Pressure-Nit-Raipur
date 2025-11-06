@@ -76,7 +76,7 @@ export default function PatientDashboard() {
           <BPCommentsTable />
           <GoogleFitActivityCard />
           <HeartRiskChecker />
-          <ConsultationHistoryCard/>
+          <PatientPrescriptionHistory/>
         </div>
       </div>
 

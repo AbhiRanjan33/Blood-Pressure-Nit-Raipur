@@ -7,8 +7,9 @@ import { useUser } from "@clerk/nextjs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Heart, AlertCircle, Pill, FileText, Sparkles } from "lucide-react";
+import { ArrowLeft, Heart, AlertCircle, Pill, FileText, Sparkles, Stethoscope, Loader2, CheckCircle2 } from "lucide-react";
 import PrescriptionForm from "@/components/doctor/PrescriptionForm";
+import BPTreatmentAdvisor from "@/components/doctor/BPTreatmentAdvisor"; // ← NEW COMPONENT
 
 interface ConsultRequest {
   _id: string;
@@ -305,12 +306,14 @@ export default function DoctorConsultation() {
           </div>
         </div>
 
-        {/* Empty State */}
-        {!reportLoading && reports.length === 0 && customReports.length === 0 && (
-          <div className="text-center py-20 text-gray-500">
-            <Sparkles className="h-20 w-20 mx-auto mb-4 text-blue-300" />
-            <p className="text-2xl">Click "Generate Report" to begin AI analysis</p>
-          </div>
+        {/* NEW: BP TREATMENT ADVISOR — INSERTED HERE */}
+        {request && (
+          <BPTreatmentAdvisor
+            age={request.patientAge || 50}
+            vitals={request.vitals}
+            medications={request.medications}
+            consultId={request._id.toString()} // ← PASS THIS
+          />
         )}
 
         {/* FINAL PRESCRIPTION FORM */}
