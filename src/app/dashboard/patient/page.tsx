@@ -6,12 +6,15 @@ import { SignOutButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heart, Activity, User } from "lucide-react";
+
 import BPEntryForm from "@/components/patient/BPEntryForm";
 import BPChartCard from "@/components/patient/BPChartCard";
 import BPCommentsTable from "@/components/patient/BPCommentsTable";
 import GoogleFitActivityCard from "@/components/patient/GoogleFitActivityCard";
 import PatientProfileCard from "@/components/patient/PatientProfileCard";
 import HeartRiskChecker from "@/components/patient/HeartRiskChecker";
+import ConsultDoctorForm from "@/components/patient/ConsultDoctorForm"; // ← NEW
+import ConsultationHistoryCard from "@/components/patient/ConsultationHistoryCard";
 
 export default function PatientDashboard() {
   const { user } = useUser();
@@ -25,7 +28,6 @@ export default function PatientDashboard() {
             <Heart className="text-red-500" /> Patient Dashboard
           </h1>
           <div className="flex items-center gap-3">
-            {/* View Profile Button */}
             <Button
               variant="outline"
               size="sm"
@@ -36,7 +38,6 @@ export default function PatientDashboard() {
               View Profile
             </Button>
 
-            {/* Google Avatar */}
             {user?.imageUrl && (
               <button
                 onClick={() => setShowProfile(true)}
@@ -57,6 +58,7 @@ export default function PatientDashboard() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
+          {/* BP Entry */}
           <Card className="p-6">
             <Activity className="h-10 w-10 text-blue-600 mb-4" />
             <h2 className="text-xl font-semibold">Track BP</h2>
@@ -64,21 +66,19 @@ export default function PatientDashboard() {
             <BPEntryForm />
           </Card>
 
-          <Card className="p-6">
-            <Heart className="h-10 w-10 text-green-600 mb-4" />
-            <h2 className="text-xl font-semibold">View Prescription</h2>
-            <p className="text-gray-600">Doctor-approved medication plan</p>
-            <Button variant="outline" className="mt-4 w-full">View</Button>
+          {/* CONSULT DOCTOR CARD + MODAL */}
+          <Card>
+            <ConsultDoctorForm />
           </Card>
 
           <BPChartCard />
           <BPCommentsTable />
           <GoogleFitActivityCard />
-          <HeartRiskChecker/>
+          <HeartRiskChecker />
+          <ConsultationHistoryCard/>
         </div>
       </div>
 
-      {/* PROFILE MODAL */}
       <PatientProfileCard open={showProfile} onClose={() => setShowProfile(false)} />
     </div>
   );

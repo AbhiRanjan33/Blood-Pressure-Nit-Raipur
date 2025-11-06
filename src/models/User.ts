@@ -41,6 +41,25 @@ export interface IPatientProfile {
   updatedAt: Date;
 }
 
+export interface IConsultRequest {
+  vitals: string;
+  allergies: string;
+  notes: string;
+  medications: string;
+  createdAt: Date;
+  consultRequests: IConsultRequest[];
+}
+
+export interface IDoctorProfile {
+  name: string;
+  registrationId: string;
+  photoUrl?: string;
+  experience: number;        // ← NEW
+  hospitalName: string;      // ← NEW
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IUser extends Document {
   clerkId: string;
   email: string;
@@ -48,6 +67,7 @@ export interface IUser extends Document {
   bpReadings: IBPReading[];
   fitData: IFitData[];
   profile?: IPatientProfile;
+  doctorProfile?: IDoctorProfile;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,7 +94,7 @@ const FitDataSchema: Schema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// models/User.ts
+
 const PatientProfileSchema: Schema = new Schema({
   name: { type: String, required: true, trim: true },
   gender: { type: String, enum: ['male', 'female', 'other'], required: true },
@@ -93,6 +113,24 @@ const PatientProfileSchema: Schema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 }, { strict: false }); // THIS LINE IS THE FIX
 
+const DoctorProfileSchema: Schema = new Schema({
+  name: { type: String, required: true, trim: true },
+  registrationId: { type: String, required: true, trim: true },
+  photoUrl: { type: String },
+  experience: { type: Number, required: true, min: 0, max: 60 },
+  hospitalName: { type: String, required: true, trim: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+}, { strict: false });
+
+const ConsultRequestSchema: Schema = new Schema({
+  vitals: { type: String, required: true },
+  allergies: { type: String, required: true },
+  notes: { type: String, required: true },
+  medications: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
 const UserSchema: Schema = new Schema({
   clerkId: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
@@ -100,6 +138,8 @@ const UserSchema: Schema = new Schema({
   bpReadings: [BPReadingSchema],
   fitData: [FitDataSchema],
   profile: PatientProfileSchema,
+  doctorProfile: DoctorProfileSchema,
+  consultRequests: [ConsultRequestSchema],
 }, { timestamps: true });
 
 export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
