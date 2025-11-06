@@ -15,6 +15,7 @@ import PatientProfileCard from "@/components/patient/PatientProfileCard";
 import HeartRiskChecker from "@/components/patient/HeartRiskChecker";
 import ConsultDoctorForm from "@/components/patient/ConsultDoctorForm"; // ← NEW
 import ConsultationHistoryCard from "@/components/patient/ConsultationHistoryCard";
+import PatientPrescriptionHistory from "@/components/patient/PatientPrescriptionHistory";
 
 export default function PatientDashboard() {
   const { user } = useUser();

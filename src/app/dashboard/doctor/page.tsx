@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Stethoscope, FileCheck, Activity, User, Clock, Heart, AlertCircle, Pill, FileText } from "lucide-react";
 import DoctorProfileCard from "@/components/doctor/DoctorProfileCard";
+import PrescriptionHistory from "@/components/doctor/PrescriptionHistory";
+import { useRouter } from "next/navigation";
 
 interface ConsultationRequest {
   _id: string;
@@ -20,10 +22,14 @@ interface ConsultationRequest {
   status?: string;
   patientName?: string;
   patientAge?: number;
+  patientId?: string;
+  prescription?: string;
+  completedAt?: string;
 }
 
 export default function DoctorDashboard() {
   const { user } = useUser();
+  const router = useRouter();
   const [showProfile, setShowProfile] = useState(false);
   const [consultRequests, setConsultRequests] = useState<ConsultationRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +42,13 @@ export default function DoctorDashboard() {
           const res = await fetch(`/api/get-doctor-consults?clerkId=${user.id}`);
           if (!res.ok) throw new Error("Failed to fetch");
           const data = await res.json();
-          setConsultRequests(data.requests || []);
+          
+          // FILTER OUT COMPLETED ONES
+          const activeRequests = (data.requests || []).filter(
+            (req: ConsultationRequest) => req.status !== "completed"
+          );
+          
+          setConsultRequests(activeRequests);
         } catch (err) {
           console.error("Failed to load consults:", err);
           setConsultRequests([]);
@@ -47,6 +59,46 @@ export default function DoctorDashboard() {
       fetchRequests();
     }
   }, [user?.id]);
+
+  const handleReview = async (consultId: string) => {
+    try {
+      const res = await fetch(
+        `/api/doctor-update-status?clerkId=${user?.id}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ consultId, status: 'under review' }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed");
+
+      router.push(`/dashboard/doctor/consultation/${consultId}`);
+    } catch (err) {
+      alert('Failed to update status. Please try again.');
+    }
+  };
+
+  const handleDeny = async (consultId: string) => {
+    if (!confirm('Deny this request? It will be removed from your list.')) return;
+
+    try {
+      const res = await fetch(
+        `/api/doctor-update-status?clerkId=${user?.id}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ consultId, status: 'denied' }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed");
+
+      setConsultRequests(prev => prev.filter(r => r._id !== consultId));
+    } catch (err) {
+      alert('Failed to deny request.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -102,8 +154,8 @@ export default function DoctorDashboard() {
           </Card>
         </div>
 
-        {/* CONSULTATION REQUESTS SECTION */}
-        <div>
+        {/* INCOMING REQUESTS */}
+        <div className="mb-12">
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             <FileText className="text-green-600" />
             Incoming Consultation Requests
@@ -120,7 +172,7 @@ export default function DoctorDashboard() {
           ) : consultRequests.length === 0 ? (
             <Card className="p-8 text-center text-gray-500">
               <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p>No consultation requests yet.</p>
+              <p>No pending consultation requests.</p>
             </Card>
           ) : (
             <div className="space-y-4">
@@ -137,7 +189,15 @@ export default function DoctorDashboard() {
                         {new Date(req.createdAt).toLocaleString()}
                       </p>
                     </div>
-                    <Badge variant={req.status === "pending" ? "secondary" : "outline"}>
+                    <Badge
+                      variant={
+                        req.status === "under review"
+                          ? "default"
+                          : req.status === "denied"
+                          ? "destructive"
+                          : "secondary"
+                      }
+                    >
                       {req.status || "pending"}
                     </Badge>
                   </div>
@@ -159,7 +219,7 @@ export default function DoctorDashboard() {
                       <p className="font-medium flex items-center gap-1">
                         <Pill className="h-4 w-4 text-blue-600" /> Medications
                       </p>
-                      <p className="text-gray-700">{req.medications || "None"}</p>
+                      <p className="text-gray-700">{req.callback || "None"}</p>
                     </div>
                     <div>
                       <p className="font-medium">Notes</p>
@@ -167,22 +227,37 @@ export default function DoctorDashboard() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex gap-2">
-                    <Button size="sm" className="flex-1">
-                      View Full Profile
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
-                      Start Chat
-                    </Button>
-                  </div>
+                  {req.status !== "denied" && (
+                    <div className="mt-4 flex gap-2">
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleReview(req._id)}
+                      >
+                        Review Request
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={() => handleDeny(req._id)}
+                      >
+                        Deny Request
+                      </Button>
+                    </div>
+                  )}
                 </Card>
               ))}
             </div>
           )}
         </div>
+
+        {/* PRESCRIPTION HISTORY */}
+        <div className="mt-16">
+          <PrescriptionHistory />
+        </div>
       </div>
 
-      {/* PROFILE MODAL */}
       <DoctorProfileCard open={showProfile} onClose={() => setShowProfile(false)} />
     </div>
   );

@@ -1,3 +1,4 @@
+// src/app/api/assign-consult-to-doctor/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/models/User';
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing data' }, { status: 400 });
     }
 
-    // 1. Get patient + consult request + profile
+    // 1. Get patient
     const patient = await User.findOne({ clerkId: patientClerkId });
     if (!patient || patient.role !== 'patient') {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
     }
 
-    // 3. Push enhanced request
+    // 3. Push enhanced request with patientId
     doctor.consultRequests.push({
       ...consultRequest.toObject(),
       _id: new mongoose.Types.ObjectId(),
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
       status: 'pending',
       patientName,
       patientAge,
+      patientId: patient._id, // ← THIS IS THE KEY
     });
 
     await doctor.save();

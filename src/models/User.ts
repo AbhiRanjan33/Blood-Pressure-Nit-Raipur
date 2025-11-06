@@ -123,6 +123,7 @@ const DoctorProfileSchema: Schema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 }, { strict: false });
 
+// models/User.ts → Inside ConsultRequestSchema
 const ConsultRequestSchema: Schema = new Schema({
   vitals: { type: String, required: true },
   allergies: { type: String, required: true },
@@ -131,9 +132,10 @@ const ConsultRequestSchema: Schema = new Schema({
   createdAt: { type: Date, default: Date.now },
   assignedAt: { type: Date },
   status: { type: String, default: 'pending' },
-  patientName: { type: String },     // ← ADD
-  patientAge: { type: Number },      // ← ADD
-}, { strict: false }); // ← CRITICAL: Allow extra fields
+  patientName: { type: String },
+  patientAge: { type: Number },
+  patientId: { type: Schema.Types.ObjectId, ref: 'User' }, // ← NEW
+}, { strict: false });
 
 const UserSchema: Schema = new Schema({
   clerkId: { type: String, required: true, unique: true },

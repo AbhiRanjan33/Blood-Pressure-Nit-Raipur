@@ -3,11 +3,11 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import ClientProviders from '@/components/ClientProviders';
-import { startDailyFitSaver } from '@/lib/dailyFitSaver'; // ← Import
+import { startDailyFitSaver } from '@/lib/dailyFitSaver';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// ← RUN CRON ON SERVER START (NO useEffect!)
+// Run cron only on server
 if (typeof window === 'undefined') {
   startDailyFitSaver();
 }
@@ -18,13 +18,30 @@ export const metadata = {
 };
 
 export default function RootLayout({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {
   return (
     <ClerkProvider>
       <html lang="en">
+        <head>
+          {/* Google Translate Script */}
+          <script
+            type="text/javascript"
+            src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+            async
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                function googleTranslateElementInit() {
+                  // Widget is ready
+                }
+              `
+            }}
+          />
+        </head>
         <body className={inter.className}>
           <ClientProviders>
             {children}
