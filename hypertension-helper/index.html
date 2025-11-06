@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hypertension Treatment Advisor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: #09f;
+      animation: spin 1s ease infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+  </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl">
+    <header class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">Hypertension Treatment Advisor</h1>
+      <p class="text-gray-500">Based on provided clinical rules</p>
+    </header>
+
+    <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg mb-6">
+      <h2 class="font-bold text-lg mb-1">IMPORTANT DISCLAIMER</h2>
+      <p class="text-sm">This tool is for informational purposes only and is based on a specific set of rules. It is <b>NOT</b> a substitute for professional medical advice, diagnosis, or treatment.</p>
+    </div>
+
+    <div id="input-form">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div>
+          <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+          <input type="number" id="age" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="e.g., 55">
+        </div>
+        <div>
+          <label for="systolic" class="block text-sm font-medium text-gray-700 mb-1">Systolic BP (mmHg)</label>
+          <input type="number" id="systolic" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="e.g., 165">
+        </div>
+        <div>
+          <label for="diastolic" class="block text-sm font-medium text-gray-700 mb-1">Diastolic BP (mmHg)</label>
+          <input type="number" id="diastolic" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="e.g., 105">
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <div class="flex items-center">
+          <input id="ckd" type="checkbox" class="h-5 w-5 text-blue-600 border-gray-300 rounded">
+          <label for="ckd" class="ml-2 block text-sm font-medium text-gray-900">Patient has CKD (Chronic Kidney Disease)</label>
+        </div>
+      </div>
+
+      <fieldset class="mb-6">
+        <legend class="block text-lg font-medium text-gray-800 mb-3">Current Medications</legend>
+        <p class="text-sm text-gray-500 mb-4">Enter patient's current medications (e.g., "amlodipine, metoprolol").</p>
+        <textarea id="medications-text" rows="3" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="e.g., Taking Telmisartan 40mg and Amlodipine 5mg..."></textarea>
+      </fieldset>
+
+      <button id="get-recommendation-btn" class="w-full bg-blue-600 text-white font-bold p-4 rounded-lg hover:bg-blue-700">
+        Get Recommendation
+      </button>
+    </div>
+
+    <div id="output-section" class="mt-8 hidden">
+      <div id="loading-indicator" class="flex justify-center items-center hidden">
+        <div class="spinner"></div>
+        <p class="ml-3 text-gray-600">Getting recommendation...</p>
+      </div>
+
+      <div id="error-message" class="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg hidden"></div>
+
+      <div id="recommendation-result" class="bg-green-50 border-l-4 border-green-600 p-6 rounded-lg shadow-md hidden">
+        <h3 class="text-xl font-semibold text-green-900 mb-3">Recommendation:</h3>
+        <pre id="recommendation-text" class="whitespace-pre-wrap text-gray-800"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const getBtn = document.getElementById('get-recommendation-btn');
+    const outputSection = document.getElementById('output-section');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const recommendationResult = document.getElementById('recommendation-result');
+    const recommendationText = document.getElementById('recommendation-text');
+    const errorMessage = document.getElementById('error-message');
+
+    getBtn.addEventListener('click', handleGetRecommendation);
+
+    async function handleGetRecommendation() {
+      resetUI();
+      const inputs = getInputs();
+      if (!validateInputs(inputs)) return;
+
+      try {
+        const response = await fetch('/get-recommendation', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(inputs)
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+
+        // ✅ Only show output if recommendation is not blank
+        if (data.recommendation && data.recommendation.trim() !== "") {
+          displayRecommendation(data.recommendation);
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        displayError(`An error occurred: ${error.message}`);
+      } finally {
+        loadingIndicator.style.display = 'none';
+      }
+    }
+
+    function resetUI() {
+      outputSection.classList.remove('hidden');
+      loadingIndicator.classList.remove('hidden');
+      recommendationResult.classList.add('hidden');
+      errorMessage.classList.add('hidden');
+      recommendationText.textContent = '';
+      errorMessage.textContent = '';
+    }
+
+    function getInputs() {
+      return {
+        age: parseInt(document.getElementById('age').value) || null,
+        systolic: parseInt(document.getElementById('systolic').value) || null,
+        diastolic: parseInt(document.getElementById('diastolic').value) || null,
+        hasCKD: document.getElementById('ckd').checked,
+        medicationsText: document.getElementById('medications-text').value
+      };
+    }
+
+    function validateInputs(inputs) {
+      if (!inputs.age || inputs.age <= 0) return displayError("Please enter a valid Age."), false;
+      if (!inputs.systolic || inputs.systolic <= 0) return displayError("Please enter a valid Systolic BP."), false;
+      if (!inputs.diastolic || inputs.diastolic <= 0) return displayError("Please enter a valid Diastolic BP."), false;
+      return true;
+    }
+
+    function displayRecommendation(text) {
+      recommendationText.textContent = text;
+      recommendationResult.classList.remove('hidden');
+      loadingIndicator.classList.add('hidden');
+    }
+
+    function displayError(msg) {
+      errorMessage.textContent = msg;
+      errorMessage.classList.remove('hidden');
+      loadingIndicator.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
