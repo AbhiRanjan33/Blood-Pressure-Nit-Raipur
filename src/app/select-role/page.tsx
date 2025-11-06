@@ -40,9 +40,9 @@ export default function SelectRole() {
       // Redirect
       // Inside assignRole function, after sync
 if (role === "patient") {
-  router.push("/patient-form"); // NEW PAGE
+  router.push("/patient-form");
 } else {
-  router.push("/dashboard/doctor");
+  router.push("/doctor-profile"); // ← NEW
 }
     } catch (err) {
       console.error('Error assigning role:', err);
