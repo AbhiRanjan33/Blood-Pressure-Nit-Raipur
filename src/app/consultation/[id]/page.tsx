@@ -7,7 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, AlertCircle, Pill, User, X, Check, Stethoscope, Sparkles, Frown } from "lucide-react";
+import { Heart, AlertCircle, Pill, User, X, Check, Stethoscope, Sparkles, Frown, ArrowLeft } from "lucide-react";
 import PatientProfileCard from "@/components/patient/PatientProfileCard";
 
 interface ConsultationRequest {
@@ -67,16 +67,45 @@ export default function ConsultationMatch() {
     }
   }, [id, user?.id, router]);
 
- const handleSwipe = (action: "accept" | "reject") => {
-  if (!currentDoctor || !currentDoctor.doctorProfile || swipeAction) return;
+  const handleSwipe = async (action: "accept" | "reject") => {
+    if (!currentDoctor || !currentDoctor.doctorProfile || swipeAction) return;
 
-  setSwipeAction(action);
+    setSwipeAction(action);
 
-  setTimeout(() => {
-    setSwipeAction(null);
-    setCurrentIndex((prev) => (prev + 1) % doctors.length);
-  }, 600);
-};
+    if (action === "accept") {
+      try {
+        const res = await fetch('/api/assign-consult-to-doctor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            patientClerkId: user?.id,
+            doctorId: currentDoctor._id,
+            consultRequestId: request?._id,
+          }),
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          console.error("Assign failed:", error);
+          alert("Failed to assign doctor. Please try again.");
+        } else {
+          console.log("Consult assigned to:", currentDoctor.doctorProfile.name);
+        }
+      } catch (err) {
+        console.error("Network error:", err);
+        alert("Network error. Please check connection.");
+      }
+    }
+
+    setTimeout(() => {
+      setSwipeAction(null);
+      setCurrentIndex((prev) => (prev + 1) % doctors.length);
+    }, 600);
+  };
+
+  const handleComplete = () => {
+    router.push("/dashboard/patient");
+  };
 
   if (loading) {
     return (
@@ -156,88 +185,100 @@ export default function ConsultationMatch() {
         </Card>
       </div>
 
- {/* TINDER CARD */}
-<div className="flex-1 max-w-md mx-auto w-full relative h-full">
-  {currentDoctor && currentDoctor.doctorProfile ? (
-    <Card
-      className={`absolute inset-0 p-8 shadow-2xl bg-white border-2 border-gray-200 transition-all duration-500
-        ${swipeAction === "accept" ? "translate-x-96 scale-110 opacity-0" : ""}
-        ${swipeAction === "reject" ? "-translate-x-96 scale-110 opacity-0" : ""}
-      `}
-    >
-      <div className="flex flex-col h-full">
-        {/* DOCTOR PHOTO */}
-        <div className="flex justify-center mb-6">
-          <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-green-100 shadow-lg">
-            {currentDoctor.doctorProfile.photoUrl ? (
-              <img
-                src={currentDoctor.doctorProfile.photoUrl}
-                alt={currentDoctor.doctorProfile.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <User className="h-16 w-16 text-gray-400" />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* DOCTOR INFO */}
-        <div className="text-center flex-1">
-          <h3 className="text-2xl font-bold">{currentDoctor.doctorProfile.name}</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            {currentDoctor.doctorProfile.hospitalName}
-          </p>
-          <div className="flex justify-center gap-4 mt-3 text-sm">
-            <Badge variant="secondary">
-              {currentDoctor.doctorProfile.experience} yrs exp
-            </Badge>
-            <Badge variant="outline">
-              {currentDoctor.doctorProfile.registrationId}
-            </Badge>
-          </div>
-        </div>
-
-        {/* SWIPE BUTTONS */}
-        <div className="flex justify-center gap-8 mt-8">
-          <Button
-            size="lg"
-            variant="outline"
-            className="w-16 h-16 rounded-full border-red-500 text-red-600 hover:bg-red-50 relative overflow-hidden"
-            onClick={() => handleSwipe("reject")}
-            disabled={!!swipeAction}
+      {/* TINDER CARD */}
+      <div className="flex-1 max-w-md mx-auto w-full relative h-full">
+        {currentDoctor && currentDoctor.doctorProfile ? (
+          <Card
+            className={`absolute inset-0 p-8 shadow-2xl bg-white border-2 border-gray-200 transition-all duration-500
+              ${swipeAction === "accept" ? "translate-x-96 scale-110 opacity-0" : ""}
+              ${swipeAction === "reject" ? "-translate-x-96 scale-110 opacity-0" : ""}
+            `}
           >
-            <X className="h-8 w-8" />
-            {swipeAction === "reject" && (
-              <div className="absolute inset-0 flex items-center justify-center bg-red-100">
-                <Frown className="h-12 w-12 text-red-600 animate-bounce" />
+            <div className="flex flex-col h-full">
+              {/* DOCTOR PHOTO */}
+              <div className="flex justify-center mb-6">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-green-100 shadow-lg">
+                  {currentDoctor.doctorProfile.photoUrl ? (
+                    <img
+                      src={currentDoctor.doctorProfile.photoUrl}
+                      alt={currentDoctor.doctorProfile.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <User className="h-16 w-16 text-gray-400" />
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </Button>
 
-          <Button
-            size="lg"
-            className="w-16 h-16 rounded-full bg-green-600 hover:bg-green-700 relative overflow-hidden"
-            onClick={() => handleSwipe("accept")}
-            disabled={!!swipeAction}
-          >
-            <Check className="h-8 w-8" />
-            {swipeAction === "accept" && (
-              <div className="absolute inset-0 flex items-center justify-center bg-green-100">
-                <Sparkles className="h-12 w-12 text-green-600 animate-ping" />
+              {/* DOCTOR INFO */}
+              <div className="text-center flex-1">
+                <h3 className="text-2xl font-bold">{currentDoctor.doctorProfile.name}</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {currentDoctor.doctorProfile.hospitalName}
+                </p>
+                <div className="flex justify-center gap-4 mt-3 text-sm">
+                  <Badge variant="secondary">
+                    {currentDoctor.doctorProfile.experience} yrs exp
+                  </Badge>
+                  <Badge variant="outline">
+                    {currentDoctor.doctorProfile.registrationId}
+                  </Badge>
+                </div>
               </div>
-            )}
-          </Button>
-        </div>
+
+              {/* SWIPE BUTTONS */}
+              <div className="flex justify-center gap-8 mt-8">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-16 h-16 rounded-full border-red-500 text-red-600 hover:bg-red-50 relative overflow-hidden"
+                  onClick={() => handleSwipe("reject")}
+                  disabled={!!swipeAction}
+                >
+                  <X className="h-8 w-8" />
+                  {swipeAction === "reject" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-red-100">
+                      <Frown className="h-12 w-12 text-red-600 animate-bounce" />
+                    </div>
+                  )}
+                </Button>
+
+                <Button
+                  size="lg"
+                  className="w-16 h-16 rounded-full bg-green-600 hover:bg-green-700 relative overflow-hidden"
+                  onClick={() => handleSwipe("accept")}
+                  disabled={!!swipeAction}
+                >
+                  <Check className="h-8 w-8" />
+                  {swipeAction === "accept" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-green-100">
+                      <Sparkles className="h-12 w-12 text-green-600 animate-ping" />
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ) : (
+          <div className="h-full flex items-center justify-center">
+            <div className="animate-spin h-10 w-10 border-4 border-green-600 rounded-full border-t-transparent" />
+          </div>
+        )}
       </div>
-    </Card>
-  ) : (
-    <div className="h-full flex items-center justify-center">
-      <div className="animate-spin h-10 w-10 border-4 border-green-600 rounded-full border-t-transparent" />
-    </div>
-  )}
-</div>
+
+      {/* COMPLETE BUTTON - BOTTOM RIGHT */}
+      <div className="absolute bottom-6 right-6 z-50">
+        <Button
+          size="lg"
+          className="rounded-full shadow-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium flex items-center gap-2"
+          onClick={handleComplete}
+        >
+          <ArrowLeft className="h-5 w-5" />
+          Complete
+        </Button>
+      </div>
 
       {/* PROFILE MODAL */}
       <PatientProfileCard open={showProfile} onClose={() => setShowProfile(false)} />

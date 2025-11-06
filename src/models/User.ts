@@ -129,7 +129,11 @@ const ConsultRequestSchema: Schema = new Schema({
   notes: { type: String, required: true },
   medications: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-});
+  assignedAt: { type: Date },
+  status: { type: String, default: 'pending' },
+  patientName: { type: String },     // ← ADD
+  patientAge: { type: Number },      // ← ADD
+}, { strict: false }); // ← CRITICAL: Allow extra fields
 
 const UserSchema: Schema = new Schema({
   clerkId: { type: String, required: true, unique: true },
