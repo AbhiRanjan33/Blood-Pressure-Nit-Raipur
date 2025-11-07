@@ -1,4 +1,4 @@
-// // src/app/dashboard/doctor/consultation/[id]/page.tsx
+// // // src/app/dashboard/doctor/consultation/[id]/page.tsx
 // "use client";
 
 // import { useEffect, useState } from "react";
@@ -327,15 +327,18 @@
 // src/app/dashboard/doctor/consultation/[id]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Heart, AlertCircle, Pill, FileText, Sparkles, Stethoscope, Loader2, CheckCircle2 } from "lucide-react";
+import {
+  ArrowLeft, Heart, AlertCircle, Pill, FileText,
+  Sparkles, Loader2
+} from "lucide-react";
 import PrescriptionForm from "@/components/doctor/PrescriptionForm";
-import BPTreatmentAdvisor from "@/components/doctor/BPTreatmentAdvisor"; // ← NEW COMPONENT
+import BPTreatmentAdvisor from "@/components/doctor/BPTreatmentAdvisor";
 
 interface ConsultRequest {
   _id: string;
@@ -378,6 +381,9 @@ export default function DoctorConsultation() {
   const [reports, setReports] = useState<DrugReport[]>([]);
   const [customDrug, setCustomDrug] = useState("");
   const [customReports, setCustomReports] = useState<DrugReport[]>([]);
+
+  // Prevent multiple Google Translate loads
+  const translateInitialized = useRef(false);
 
   useEffect(() => {
     if (!id || !user?.id) return;
@@ -468,12 +474,7 @@ export default function DoctorConsultation() {
     }
   };
 
-  /**
-   * UI-only: Build consistent styled HTML for each report.
-   * NOTE: This function only changes presentation (classes + layout). Logic and content unchanged.
-   */
   const createReportCardHTML = (report: DrugReport) => {
-    // map alert type -> small accent class
     const alertToAccent = (type: string) => {
       if (type.toUpperCase().includes("CONTRAINDICATION")) return "border-red-500 bg-red-50";
       if (type.toUpperCase().includes("INTERACTION")) return "border-yellow-400 bg-yellow-50";
@@ -505,7 +506,6 @@ export default function DoctorConsultation() {
       return `<pre class="whitespace-pre-wrap text-xs ${colorClass} border rounded p-3 max-h-36 overflow-auto">${escapeHtml(text || "No information available.")}</pre>`;
     };
 
-    // final card structure: white card with subtle border & shadow, compact spacing
     return `
       <div class="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden">
         <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between gap-4">
@@ -558,7 +558,6 @@ export default function DoctorConsultation() {
     `;
   };
 
-  // small utility to escape HTML content inserted via dangerouslySetInnerHTML
   const escapeHtml = (unsafe: string) => {
     return String(unsafe)
       .replaceAll("&", "&amp;")
@@ -566,6 +565,35 @@ export default function DoctorConsultation() {
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+  };
+
+  // Hindi Translation Function
+  const translateToHindi = () => {
+    if (translateInitialized.current) return;
+
+    const script = document.createElement("script");
+    script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    script.async = true;
+    document.body.appendChild(script);
+
+    // @ts-ignore
+    window.googleTranslateElementInit = () => {
+      // @ts-ignore
+      new window.google.translate.TranslateElement(
+        { pageLanguage: "en", includedLanguages: "hi", autoDisplay: false },
+        "google_translate_element"
+      );
+
+      setTimeout(() => {
+        const select = document.querySelector(".goog-te-combo") as HTMLSelectElement;
+        if (select) {
+          select.value = "hi";
+          select.dispatchEvent(new Event("change"));
+        }
+      }, 500);
+
+      translateInitialized.current = true;
+    };
   };
 
   if (loading) {
@@ -579,185 +607,176 @@ export default function DoctorConsultation() {
   if (!request) return null;
 
   return (
-  <div className="min-h-screen bg-gray-50">
-    <div className="container mx-auto p-5 md:p-6 max-w-5xl">
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => router.push("/dashboard/doctor")}
-        className="mb-5 text-gray-700 hover:text-sky-700"
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
-      </Button>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto p-5 md:p-6 max-w-5xl">
 
-      {/* Header */}
-      <header className="mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold text-sky-700 mb-1">
-          Clinical Summary & Alerter Tool (LLM)
-        </h1>
-        <p className="text-sm text-gray-600">
-          AI-powered drug safety checker using openFDA + Gemini
-        </p>
-      </header>
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/dashboard/doctor")}
+          className="mb-5 text-gray-700 hover:text-sky-700"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
+        </Button>
 
-      {/* Patient Profile */}
-      <Card className="p-5 mb-5 shadow-sm border border-gray-100 rounded-lg bg-white">
-        <h2 className="text-base font-semibold mb-3 border-b border-gray-100 pb-2">
-          Patient Profile
-        </h2>
-        <div className="grid md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="font-semibold text-gray-700 mb-2">
-              <Heart className="inline h-4 w-4 text-red-600 mr-1" /> Vitals
-            </p>
-            <p className="font-mono text-sm bg-gray-50 p-2.5 rounded border border-gray-100">
-              {request.vitals}
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700 mb-2">
-              <AlertCircle className="inline h-4 w-4 text-orange-600 mr-1" /> Allergies
-            </p>
-            <p className="bg-gray-50 p-2.5 rounded border border-gray-100">
-              {request.allergies || "None"}
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700 mb-2">
-              <Pill className="inline h-4 w-4 text-blue-600 mr-1" /> Current Medications
-            </p>
-            <p className="bg-gray-50 p-2.5 rounded border border-gray-100">
-              {request.medications || "None"}
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700 mb-2">
-              <FileText className="inline h-4 w-4 text-sky-600 mr-1" /> Notes / History
-            </p>
-            <p className="bg-gray-50 p-2.5 rounded border border-gray-100 italic text-sm">
-              {request.notes || "None"}
-            </p>
-          </div>
-        </div>
-
-        {/* Generate Report */}
-        <div className="border-t pt-5 mt-5">
-          <h3 className="text-sm font-semibold mb-2">1. Generate Default Report</h3>
-          <p className="text-xs text-gray-600 mb-3">
-            Check against common hypertension drugs and generate AI alerts
+        {/* Header */}
+        <header className="mb-6">
+          <h1 className="text-xl md:text-2xl font-semibold text-sky-700 mb-1">
+            Clinical Summary & Alerter Tool (LLM)
+          </h1>
+          <p className="text-sm text-gray-600">
+            AI-powered drug safety checker using openFDA + Gemini
           </p>
-          <Button
-            onClick={generateSummaryReport}
-            disabled={reportLoading}
-            className="w-full bg-sky-600 hover:bg-sky-700 text-xs py-2.5"
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            {reportLoading
-              ? "Analyzing... (this may take a few seconds)"
-              : "Generate Summary Report"}
-          </Button>
-        </div>
+        </header>
 
-        {/* Custom Drug */}
-        <div className="mt-5 border-t pt-5">
-          <h3 className="text-sm font-semibold mb-2">2. Check a Specific Drug</h3>
-          <p className="text-xs text-gray-600 mb-3">
-            Enter any drug name (generic or brand) to get a focused safety report
-          </p>
-          <div className="flex gap-2">
-            <Input
-              placeholder="e.g., Warfarin, Aspirin, Paracetamol"
-              value={customDrug}
-              onChange={(e) => setCustomDrug(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && checkSingleDrug()}
-              className="text-xs"
-            />
-            <Button onClick={checkSingleDrug} variant="secondary" size="sm" className="text-xs">
-              Check
+        {/* Patient Profile */}
+        <Card className="p-5 mb-5 shadow-sm border border-gray-100 rounded-lg bg-white">
+          <h2 className="text-base font-semibold mb-3 border-b border-gray-100 pb-2">
+            Patient Profile
+          </h2>
+          <div className="grid md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="font-semibold text-gray-700 mb-2">
+                <Heart className="inline h-4 w-4 text-red-600 mr-1" /> Vitals
+              </p>
+              <p className="font-mono text-sm bg-gray-50 p-2.5 rounded border border-gray-100">
+                {request.vitals}
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-700 mb-2">
+                <AlertCircle className="inline h-4 w-4 text-orange-600 mr-1" /> Allergies
+              </p>
+              <p className="bg-gray-50 p-2.5 rounded border border-gray-100">
+                {request.allergies || "None"}
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-700 mb-2">
+                <Pill className="inline h-4 w-4 text-blue-600 mr-1" /> Current Medications
+              </p>
+              <p className="bg-gray-50 p-2.5 rounded border border-gray-100">
+                {request.medications || "None"}
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-700 mb-2">
+                <FileText className="inline h-4 w-4 text-sky-600 mr-1" /> Notes / History
+              </p>
+              <p className="bg-gray-50 p-2.5 rounded border border-gray-100 italic text-sm">
+                {request.notes || "None"}
+              </p>
+            </div>
+          </div>
+
+          {/* Generate Report */}
+          <div className="border-t pt-5 mt-5">
+            <h3 className="text-sm font-semibold mb-2">1. Generate Default Report</h3>
+            <p className="text-xs text-gray-600 mb-3">
+              Check against common hypertension drugs and generate AI alerts
+            </p>
+            <Button
+              onClick={generateSummaryReport}
+              disabled={reportLoading}
+              className="w-full bg-sky-600 hover:bg-sky-700 text-xs py-2.5"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              {reportLoading
+                ? "Analyzing... (this may take a few seconds)"
+                : "Generate Summary Report"}
             </Button>
           </div>
-        </div>
-      </Card>
 
-      {/* Custom Reports */}
-      {customReports.length > 0 && (
-        <div className="mb-5 space-y-3">
-          <div className="text-sm font-semibold text-gray-800">Recent Drug Checks</div>
-          <div className="space-y-3">
-            {customReports.map((r, i) => (
-              <div key={i} dangerouslySetInnerHTML={{ __html: createReportCardHTML(r) }} />
-            ))}
+          {/* Custom Drug */}
+          <div className="mt-5 border-t pt-5">
+            <h3 className="text-sm font-semibold mb-2">2. Check a Specific Drug</h3>
+            <p className="text-xs text-gray-600 mb-3">
+              Enter any drug name (generic or brand) to get a focused safety report
+            </p>
+            <div className="flex gap-2">
+              <Input
+                placeholder="e.g., Warfarin, Aspirin, Paracetamol"
+                value={customDrug}
+                onChange={(e) => setCustomDrug(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && checkSingleDrug()}
+                className="text-xs"
+              />
+              <Button onClick={checkSingleDrug} variant="secondary" size="sm" className="text-xs">
+                Check
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        </Card>
 
-      {/* Loading Spinner */}
-      {reportLoading && (
-        <div className="my-6 text-center">
-          <div className="inline-block animate-spin h-10 w-10 border-4 border-sky-500 rounded-full border-t-transparent"></div>
-          <p className="mt-3 text-xs text-sky-700">
-            Generating report... this may take a few seconds
-          </p>
-        </div>
-      )}
+        {/* Custom Reports */}
+        {customReports.length > 0 && (
+          <div className="mb-5 space-y-3">
+            <div className="text-sm font-semibold text-gray-800">Recent Drug Checks</div>
+            <div className="space-y-3">
+              {customReports.map((r, i) => (
+                <div key={i} dangerouslySetInnerHTML={{ __html: createReportCardHTML(r) }} />
+              ))}
+            </div>
+          </div>
+        )}
 
-      {/* AI Reports */}
-      {reports.length > 0 && (
+        {/* Loading Spinner */}
+        {reportLoading && (
+          <div className="my-6 text-center">
+            <div className="inline-block animate-spin h-10 w-10 border-4 border-sky-500 rounded-full border-t-transparent"></div>
+            <p className="mt-3 text-xs text-sky-700">
+              Generating report... this may take a few seconds
+            </p>
+          </div>
+        )}
+
+        {/* AI Reports + HINDI BUTTON */}
+        {reports.length > 0 && (
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-3">
+              <div className="text-sm font-semibold text-gray-800">AI Summary Reports</div>
+
+              {/* HINDI TRANSLATE BUTTON */}
+              <button
+                onClick={translateToHindi}
+                className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-[11px] px-3 py-1.5 rounded-full shadow-sm hover:scale-105 transition-all"
+              >
+                हिन्दी में
+              </button>
+            </div>
+
+            {/* Hidden Google Translate Container */}
+            <div id="google_translate_element" style={{ display: "none" }}></div>
+
+            {/* Reports */}
+            <div className="space-y-3">
+              {reports.map((report, i) => (
+                <div key={i} dangerouslySetInnerHTML={{ __html: createReportCardHTML(report) }} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* BP TREATMENT ADVISOR */}
+        {request && (
+          <div className="mb-4">
+            <div className="scale-95 transform origin-top">
+              <BPTreatmentAdvisor
+                age={request.patientAge || 50}
+                vitals={request.vitals}
+                medications={request.medications}
+                consultId={request._id.toString()}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* PRESCRIPTION FORM */}
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-3">
-            <div className="text-sm font-semibold text-gray-800">AI Summary Reports</div>
-            <button
-              onClick={() => {
-                const container = document.getElementById("google_translate_element");
-                if (container) {
-                  // @ts-ignore
-                  new google.translate.TranslateElement(
-                    { pageLanguage: "en", includedLanguages: "hi", autoDisplay: false },
-                    "google_translate_element"
-                  );
-                  setTimeout(() => {
-                    const select = document.querySelector(".goog-te-combo") as HTMLSelectElement;
-                    if (select) {
-                      select.value = "hi";
-                      select.dispatchEvent(new Event("change"));
-                    }
-                  }, 300);
-                }
-              }}
-              className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-[11px] px-3 py-1.5 rounded-full shadow-sm hover:scale-105"
-            >
-              हिन्दी में
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {reports.map((report, i) => (
-              <div key={i} dangerouslySetInnerHTML={{ __html: createReportCardHTML(report) }} />
-            ))}
-          </div>
+          <PrescriptionForm />
         </div>
-      )}
-
-      {/* BP TREATMENT ADVISOR */}
-      {request && (
-        <div className="mb-4">
-          <div className="scale-95 transform origin-top">
-            <BPTreatmentAdvisor
-              age={request.patientAge || 50}
-              vitals={request.vitals}
-              medications={request.medications}
-              consultId={request._id.toString()}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* PRESCRIPTION FORM */}
-      <div className="mb-6">
-        <PrescriptionForm />
       </div>
     </div>
-  </div>
-);
+  );
 }

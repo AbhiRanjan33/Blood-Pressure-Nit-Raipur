@@ -1,50 +1,13 @@
-# import os
-# from twilio.rest import Client
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# # Twilio credentials
-# ACCOUNT_SID = os.getenv("TWILIO_SID")
-# AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-# TWILIO_PHONE = os.getenv("TWILIO_PHONE")
-
-# client = Client(ACCOUNT_SID, AUTH_TOKEN)
-
-# # ====== Send SMS Reminder ======
-# def send_sms(to_number, message):
-#     client.messages.create(
-#         body=message,
-#         from_=TWILIO_PHONE,
-#         to=to_number
-#     )
-#     print(f"✅ SMS sent to {to_number}: {message}")
-
-# # ====== Make Call Reminder ======
-# def make_call(to_number, message):
-#     call = client.calls.create(
-#         twiml=f'<Response><Say>{message}</Say></Response>',
-#         to=to_number,
-#         from_=TWILIO_PHONE
-#     )
-#     print(f"📞 Call initiated to {to_number}: {message}")
-
-# # ====== Run Reminder Immediately ======
-# def schedule_reminder():
-#     phone = "+918287305782"  # recipient phone number
-#     message = "Hello! This is your reminder to check your BP and update your vitals."
-#     make_call(phone, message)
-
-# # 🔥 Run instantly
-# schedule_reminder()
-
-
-# call_system/app.py
+# app.py
 from flask import Flask, request, jsonify
 from twilio.rest import Client
 import os
 from dotenv import load_dotenv
 import concurrent.futures
+import croniter
+import threading
+import time
+from datetime import datetime
 
 load_dotenv()
 
@@ -53,6 +16,9 @@ app = Flask(__name__)
 client = Client(os.getenv("TWILIO_SID"), os.getenv("TWILIO_TOKEN"))
 TWILIO_PHONE = os.getenv("TWILIO_PHONE")
 
+# Store active reminders
+reminders = {}
+
 def make_call(to_number, message):
     try:
         call = client.calls.create(
@@ -60,7 +26,7 @@ def make_call(to_number, message):
             to=to_number,
             from_=TWILIO_PHONE
         )
-        print(f"Call initiated to {to_number}: {call.sid}")
+        print(f"Call to {to_number}: {call.sid}")
         return {"success": True, "sid": call.sid}
     except Exception as e:
         print(f"Call failed: {e}")
@@ -73,16 +39,51 @@ def sos():
     patient_name = data.get("name", "Patient")
     bp = data.get("bp", "Unknown")
 
-    if not numbers:
-        return jsonify({"error": "No numbers"}), 400
-
-    message = f"EMERGENCY! {patient_name} needs urgent help! Blood pressure is {bp}. Location: Check app. Please rush!"
+    message = f"EMERGENCY! {patient_name} needs urgent help! BP: {bp}. Please rush!"
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(make_call, num, message) for num in numbers]
         results = [f.result() for f in concurrent.futures.as_completed(futures)]
 
     return jsonify({"success": True, "results": results})
+
+@app.route("/set-reminder", methods=["POST"])
+def set_reminder():
+    data = request.json
+    clerkId = data.get("clerkId")
+    phone = data.get("phone")
+    enabled = data.get("enabled", False)
+
+    if not clerkId or not phone:
+        return jsonify({"error": "Invalid data"}), 400
+
+    if enabled:
+        reminders[clerkId] = phone
+    else:
+        reminders.pop(clerkId, None)
+
+    return jsonify({"success": True})
+
+# Background scheduler
+def start_scheduler():
+    while True:
+        now = datetime.now()
+        # 8:00 AM and 8:00 PM IST
+        for hour in [1, 20]:
+            schedule = f"0 {hour} * * *"
+            cron = croniter.croniter(schedule, now)
+            next_run = cron.get_next(datetime)
+
+            if now.hour == next_run.hour and now.minute == next_run.minute:
+                message = "नमस्ते! कृपया अपना ब्लड प्रेशर अभी चेक करें। स्वस्थ रहें!"
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    futures = [executor.submit(make_call, phone, message) for phone in reminders.values()]
+                    [f.result() for f in futures]
+                time.sleep(60)  # Avoid double call
+        time.sleep(30)
+
+# Start scheduler in background
+threading.Thread(target=start_scheduler, daemon=True).start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

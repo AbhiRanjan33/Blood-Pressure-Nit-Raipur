@@ -19,6 +19,7 @@ import CompletedPrescriptions from "@/components/patient/CompletedPrescription";
 import NearestHospital from "@/components/patient/NearestHospital";
 import EmergencyContactsCard from "@/components/patient/EmergencyContactsCard";
 import Link from "next/link";
+import BPReminderToggle from "@/components/patient/BPReminderToggle";
 
 export default function PatientDashboard() {
   const { user } = useUser();
@@ -74,21 +75,13 @@ export default function PatientDashboard() {
               ) : (
                 <>
                   <AlertTriangle className="h-6 w-6 mr-2" />
-                  SOS EMERGENCY
+                  SOS
                 </>
               )}
             </Button>
 
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowProfile(true)}
-              className="flex items-center gap-2"
-            >
-              <User className="h-4 w-4" />
-              View Profile
-            </Button>
+            <BPReminderToggle/>
 
             {user?.imageUrl && (
               <button

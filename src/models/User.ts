@@ -156,6 +156,10 @@ const UserSchema: Schema = new Schema({
   profile: PatientProfileSchema,
   doctorProfile: DoctorProfileSchema,
   consultRequests: [ConsultRequestSchema],
+  bpReminder: {
+  enabled: { type: Boolean, default: false },
+  phone: { type: String, match: /^\+?[1-9]\d{1,14}$/ }, // E.164 format
+},
 }, { timestamps: true });
 
 export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
