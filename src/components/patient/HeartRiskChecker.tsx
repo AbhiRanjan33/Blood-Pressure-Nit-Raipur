@@ -6,7 +6,7 @@ import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Heart, Activity } from "lucide-react";
+import { AlertCircle, Heart, Activity, Siren } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface RiskResult {
@@ -21,6 +21,27 @@ export default function HeartRiskChecker() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RiskResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sosTriggered, setSosTriggered] = useState(false);
+
+  const triggerAutoSOS = async () => {
+    if (!user?.id || sosTriggered) return;
+
+    try {
+      const res = await fetch("/api/trigger-sos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clerkId: user.id }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setSosTriggered(true);
+        console.log("AUTO SOS CALL SENT TO EMERGENCY CONTACTS");
+      }
+    } catch (err) {
+      console.error("Auto SOS failed:", err);
+    }
+  };
 
   const checkRisk = async () => {
     if (!user?.id) {
@@ -31,26 +52,20 @@ export default function HeartRiskChecker() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setSosTriggered(false);
 
     try {
-      // 1. Fetch profile
       const profileRes = await fetch(`/api/get-patient-profile?clerkId=${user.id}`);
       if (!profileRes.ok) throw new Error("Profile load failed");
       const profileData = await profileRes.json();
       if (!profileData.profile) throw new Error("Complete your profile first.");
 
-      console.log("PROFILE LOADED:", profileData.profile);
-
-      // 2. Fetch today's BP
       const today = new Date().toISOString().split('T')[0];
       const bpRes = await fetch(`/api/get-today-bp?clerkId=${user.id}&date=${today}`);
       if (!bpRes.ok) throw new Error("Add today's BP reading first.");
       const bpData = await bpRes.json();
       if (!bpData.reading) throw new Error("No BP reading for today.");
 
-      console.log("TODAY'S BP READING:", bpData.reading);
-
-      // 3. Build payload
       const payload = {
         gender: profileData.profile.gender === "male" ? "M" : "F",
         age: profileData.profile.age,
@@ -67,11 +82,6 @@ export default function HeartRiskChecker() {
         chronic_obstructive_pulmonary_disorder: profileData.profile.chronic_obstructive_pulmonary_disorder === "yes" ? 1 : 0,
       };
 
-      // LOG FULL PAYLOAD
-      console.log("SENDING TO RENDER API (EXACT PAYLOAD):");
-      console.table(payload);
-
-      // 4. Call proxy
       const apiRes = await fetch('/api/check-heart-risk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,12 +94,13 @@ export default function HeartRiskChecker() {
       }
 
       const apiData: RiskResult = await apiRes.json();
-
-      // LOG RESPONSE
-      console.log("RESPONSE FROM RENDER API:");
-      console.log(apiData);
-
       setResult(apiData);
+
+      // AUTO SOS IF RISK > 80%
+      if (apiData.predicted_probability && apiData.predicted_probability >= 0.75) {
+        await triggerAutoSOS();
+      }
+
     } catch (err: any) {
       console.error("Heart Risk Error:", err);
       setError(err.message || "Failed to check risk.");
@@ -111,10 +122,10 @@ export default function HeartRiskChecker() {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full border-2 border-red-200">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Heart className="h-5 w-5 text-red-600" />
+          <Heart className="h-6 w-6 text-red-600 animate-pulse" />
           AI Heart Risk Diagnosis
         </CardTitle>
         <p className="text-sm text-gray-600">Powered by Gemini 2.5 Flash</p>
@@ -123,7 +134,7 @@ export default function HeartRiskChecker() {
         <Button
           onClick={checkRisk}
           disabled={loading}
-          className="w-full"
+          className="w-full bg-red-600 hover:bg-red-700 font-bold"
         >
           {loading ? "Analyzing..." : "Check Diagnosis for Today"}
         </Button>
@@ -135,8 +146,21 @@ export default function HeartRiskChecker() {
           </Alert>
         )}
 
+        {sosTriggered && (
+          <Alert className="bg-red-100 border-red-500">
+            <Siren className="h-5 w-5 text-red-600 animate-spin" />
+            <AlertDescription className="font-bold text-red-800">
+              EMERGENCY SOS SENT! Your contacts are being called NOW!
+            </AlertDescription>
+          </Alert>
+        )}
+
         {result && (
-          <div className="space-y-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border">
+          <div className={`space-y-4 p-6 rounded-lg border-4 ${
+            result.predicted_probability! > 0.8 
+              ? "bg-red-100 border-red-600 animate-pulse" 
+              : "bg-gradient-to-r from-red-50 to-orange-50 border-orange-400"
+          }`}>
             <div className="flex items-center justify-between">
               <span className="font-medium">BP Status</span>
               <Badge variant={getRiskColor(result.bp_category)}>
@@ -145,30 +169,28 @@ export default function HeartRiskChecker() {
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="font-medium">Risk Probability</span>
-              <span className="text-lg font-bold text-red-600">
-                {result.predicted_probability != null 
-                  ? (result.predicted_probability * 100).toFixed(1) + "%"
-                  : "N/A"
-                }
+              <span className="font-medium text-lg">Heart Attack Risk</span>
+              <span className={`text-3xl font-bold ${
+                result.predicted_probability! > 0.8 ? "text-red-700" : "text-red-600"
+              }`}>
+                {(result.predicted_probability! * 100).toFixed(1)}%
               </span>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Activity className="h-4 w-4" />
-              Model: <code className="bg-gray-200 px-2 py-1 rounded">{result.model || "Unknown"}</code>
-            </div>
-
-            {result.raw_model_output && (
-              <details className="text-xs bg-white p-2 rounded border mt-2">
-                <summary className="cursor-pointer font-medium mb-1">Raw AI Output</summary>
-                <pre className="whitespace-pre-wrap text-gray-700 text-xs">
-                  {result.raw_model_output}
-                </pre>
-              </details>
+            {result.predicted_probability! > 0.8 && (
+              <div className="text-center py-4">
+                <p className="text-2xl font-bold text-red-800 animate-pulse">
+                  CRITICAL RISK — CALL SENT
+                </p>
+              </div>
             )}
 
-            <div className="pt-2 flex justify-end">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Activity className="h-4 w-4" />
+              Model: <code className="bg-gray-200 px-2 py-1 rounded">{result.model || "Gemini"}</code>
+            </div>
+
+            <div className="pt-4 flex justify-end space-x-2">
               <Button variant="outline" size="sm" onClick={() => setResult(null)}>
                 Check Again
               </Button>

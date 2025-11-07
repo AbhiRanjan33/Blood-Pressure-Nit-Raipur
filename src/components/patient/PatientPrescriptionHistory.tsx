@@ -4,11 +4,11 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, Calendar, Clock, CheckCircle2, Hourglass, AlertCircle, Search, Pill } from "lucide-react";
+import { FileText, Calendar, Clock, CheckCircle2, Hourglass, AlertCircle, Search } from "lucide-react";
 import { format } from "date-fns";
 
 interface ConsultRequest {
@@ -60,9 +60,9 @@ export default function PatientPrescriptionHistory() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-green-600 text-white"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
       case "under review":
-        return <Badge className="bg-blue-600 text-white"><Hourglass className="h-3 w-3 mr-1" /> Under Review</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200"><Hourglass className="h-3 w-3 mr-1" /> Under Review</Badge>;
       default:
         return <Badge variant="secondary"><AlertCircle className="h-3 w-3 mr-1" /> Pending</Badge>;
     }
@@ -78,114 +78,121 @@ export default function PatientPrescriptionHistory() {
   }
 
   return (
-    <div className="space-y-10">
-      {/* COMPLETED PRESCRIPTIONS */}
-      <div>
-        <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-green-700">
-          <FileText className="h-9 w-9" />
-          My Prescriptions
-          <span className="text-sm font-normal text-gray-600">(Last 7 completed)</span>
-        </h2>
+    <div className="flex flex-col lg:flex-row gap-10 w-full">
+      {/* COMPLETED PRESCRIPTIONS - NEW CARD DESIGN */}
+      <Card className="w-full lg:w-1/2 flex flex-col">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-green-700">
+            <FileText className="h-7 w-7" />
+            <div className="flex flex-col">
+              My Prescriptions
+              <span className="text-sm font-normal text-gray-600 mt-1">(Last 7 completed)</span>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-grow">
+          {completed.length === 0 ? (
+            <div className="p-12 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50 h-full flex flex-col justify-center">
+              <FileText className="h-20 w-20 mx-auto text-gray-300 mb-4" />
+              <p className="text-xl font-semibold text-gray-600">No prescriptions yet</p>
+              <p className="text-sm text-gray-500 mt-2">Your completed consultations will appear here</p>
+            </div>
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="font-bold text-gray-800">Date & Vitals</TableHead>
+                    <TableHead className="font-bold text-gray-800">Prescription</TableHead>
+                    <TableHead className="text-right font-bold text-gray-800">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {completed.map((c) => (
+                    <TableRow key={c._id} className="hover:bg-gray-50 transition-colors">
+                      <TableCell className="font-medium w-[150px]">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-4 w-4 text-green-700" />
+                          {format(new Date(c.completedAt!), "dd MMM yyyy")}
+                        </div>
+                        <div className="text-xs text-gray-600 flex items-center gap-1.5 mt-2">
+                          BP: <span className="font-mono font-semibold">{c.vitals}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <pre className="whitespace-pre-wrap font-sans text-sm font-medium text-gray-800">
+                          {c.prescription}
+                        </pre>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                          onClick={() => router.push(`/patient/medicine-search/${c._id}`)}
+                        >
+                          <Search className="h-4 w-4 mr-1" />
+                          Find Best Price
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        {completed.length === 0 ? (
-          <Card className="p-12 text-center border-2 border-dashed border-green-200">
-            <FileText className="h-20 w-20 mx-auto text-green-300 mb-4" />
-            <p className="text-xl font-semibold text-gray-600">No prescriptions yet</p>
-            <p className="text-sm text-gray-500 mt-2">Your completed consultations will appear here</p>
-          </Card>
-        ) : (
-          <Card className="shadow-lg border-green-100">
+      {/* RECENT STATUS - NEW CARD DESIGN */}
+      <Card className="w-full lg:w-1/2 flex flex-col">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-blue-700">
+            <CheckCircle2 className="h-7 w-7" />
+             <div className="flex flex-col">
+              Consultation Status
+              <span className="text-sm font-normal text-gray-600 mt-1">(Last 7 requests)</span>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-grow">
+          <div className="w-full overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-green-50">
-                  <TableHead className="font-bold">Date & Time</TableHead>
-                  <TableHead className="font-bold">BP</TableHead>
-                  <TableHead className="font-bold">Prescription</TableHead>
-                  <TableHead className="text-right font-bold">Search</TableHead>
+                <TableRow>
+                  <TableHead className="font-bold text-gray-800">Requested On</TableHead>
+                  <TableHead className="font-bold text-gray-800">Symptoms & Notes</TableHead>
+                  <TableHead className="font-bold text-gray-800">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {completed.map((c) => (
-                  <TableRow key={c._id} className="hover:bg-green-50 transition-colors">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4 text-green-700" />
-                        {format(new Date(c.completedAt!), "dd MMM yyyy")}
+                {recentStatus.map((r) => (
+                  <TableRow key={r._id} className="hover:bg-gray-50 transition-colors">
+                    <TableCell className="w-[150px]">
+                      <div className="flex items-center gap-1.5 font-medium">
+                        <Calendar className="h-4 w-4 text-blue-700" />
+                        {format(new Date(r.createdAt), "dd MMM yyyy")}
                       </div>
-                      <div className="text-xs text-gray-600 flex items-center gap-1 mt-1">
-                        <Clock className="h-3 w-3" />
-                        {format(new Date(c.completedAt!), "hh:mm a")}
+                      <div className="text-xs text-gray-600 mt-1 ml-1">
+                        {format(new Date(r.createdAt), "hh:mm a")}
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono font-semibold">{c.vitals}</TableCell>
                     <TableCell>
-                      <pre className="whitespace-pre-wrap text-sm font-medium text-gray-800">
-                        {c.prescription}
-                      </pre>
+                      <div className="text-sm max-w-xs">
+                        <span className="font-semibold text-gray-700">Notes:</span> {r.notes}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Allergies: <span className="font-medium text-gray-600">{r.allergies}</span> | 
+                        Meds: <span className="font-medium text-gray-600">{r.medications}</span>
+                      </div>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold"
-                        onClick={() => router.push(`/patient/medicine-search/${c._id}`)}
-                      >
-                        <Search className="h-4 w-4 mr-1" />
-                        Search Best Price
-                      </Button>
-                    </TableCell>
+                    <TableCell>{getStatusBadge(r.status)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </Card>
-        )}
-      </div>
-
-      {/* RECENT STATUS */}
-      <div>
-        <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-blue-700">
-          <CheckCircle2 className="h-9 w-9" />
-          Recent Consultation Status
-          <span className="text-sm font-normal text-gray-600">(Last 7 requests)</span>
-        </h2>
-
-        <Card className="shadow-lg border-blue-100">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-blue-50">
-                <TableHead className="font-bold">Requested On</TableHead>
-                <TableHead className="font-bold">Symptoms & Notes</TableHead>
-                <TableHead className="font-bold">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentStatus.map((r) => (
-                <TableRow key={r._id} className="hover:bg-blue-50 transition-colors">
-                  <TableCell>
-                    <div className="flex items-center gap-1 font-medium">
-                      <Calendar className="h-4 w-4 text-blue-700" />
-                      {format(new Date(r.createdAt), "dd MMM yyyy")}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {format(new Date(r.createdAt), "hh:mm a")}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <span className="font-semibold text-gray-700">Notes:</span> {r.notes}
-                    </div>
-                    <div className="text-xs text-gray-600 mt-1">
-                      Allergies: <span className="font-medium">{r.allergies}</span> | 
-                      Meds: <span className="font-medium">{r.medications}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(r.status)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

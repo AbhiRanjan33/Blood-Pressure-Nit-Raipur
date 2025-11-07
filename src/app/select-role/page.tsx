@@ -7,12 +7,12 @@ import { Card } from "@/components/ui/card";
 import { Stethoscope, User } from "lucide-react";
 
 export default function SelectRole() {
-  const { user } = useClerk(); // Removed setActive (not needed)
+  const { user } = useClerk();
   const router = useRouter();
 
   const assignRole = async (role: "patient" | "doctor") => {
     if (!user) {
-      console.error('No user found');
+      console.error("No user found");
       return;
     }
 
@@ -23,9 +23,9 @@ export default function SelectRole() {
       });
 
       // Step 2: Sync to MongoDB via API
-      const response = await fetch('/api/sync-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/sync-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clerkId: user.id,
           email: user.emailAddresses[0]?.emailAddress,
@@ -34,49 +34,62 @@ export default function SelectRole() {
       });
 
       if (!response.ok) {
-        throw new Error('Sync failed');
+        throw new Error("Sync failed");
       }
 
-      // Redirect
-      // Inside assignRole function, after sync
-if (role === "patient") {
-  router.push("/patient-form");
-} else {
-  router.push("/doctor-profile"); // ← NEW
-}
+      // Redirect based on role
+      if (role === "patient") {
+        router.push("/patient-form");
+      } else {
+        router.push("/doctor-profile");
+      }
     } catch (err) {
-      console.error('Error assigning role:', err);
-      alert('Something went wrong. Please try again.');
+      console.error("Error assigning role:", err);
+      alert("Something went wrong. Please try again.");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md p-8 shadow-xl">
-        <h1 className="text-2xl font-bold text-center mb-6">Choose Your Role</h1>
-        <p className="text-center text-gray-600 mb-8">
-          How will you use BP Health AI?
-        </p>
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        backgroundImage: `url('/pod.jpg')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      {/* Semi-transparent overlay for readability */}
+      <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-0" />
 
-        <div className="space-y-4">
-          <Button
-            onClick={() => assignRole("patient")}
-            className="w-full h-16 text-lg"
-            variant="outline"
-          >
-            <User className="mr-3 h-6 w-6" />
-            I am a <span className="font-semibold ml-1">Patient</span>
-          </Button>
+      <div className="relative z-10 w-full max-w-md">
+        <Card className="p-8 shadow-2xl bg-white/95 backdrop-blur-md border border-gray-200">
+          <h1 className="text-2xl font-bold text-center mb-6 text-gray-900">Choose Your Role</h1>
+          <p className="text-center text-gray-600 mb-8">
+            How will you use BP Health AI?
+          </p>
 
-          <Button
-            onClick={() => assignRole("doctor")}
-            className="w-full h-16 text-lg bg-blue-600 hover:bg-blue-700"
-          >
-            <Stethoscope className="mr-3 h-6 w-6" />
-            I am a <span className="font-semibold ml-1">Doctor</span>
-          </Button>
-        </div>
-      </Card>
+          <div className="space-y-4">
+            <Button
+              onClick={() => assignRole("patient")}
+              className="w-full h-16 text-lg border-red-300 text-red-900 hover:bg-red-50"
+              variant="outline"
+            >
+              <User className="mr-3 h-6 w-6" />
+              I am a <span className="font-semibold ml-1">Patient</span>
+            </Button>
+
+            <Button
+              onClick={() => assignRole("doctor")}
+              className="w-full h-16 text-lg bg-red-900 hover:bg-red-800 text-white"
+            >
+              <Stethoscope className="mr-3 h-6 w-6" />
+              I am a <span className="font-semibold ml-1">Doctor</span>
+            </Button>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

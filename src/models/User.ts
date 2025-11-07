@@ -109,6 +109,16 @@ const PatientProfileSchema: Schema = new Schema({
   rheumatoid_arthritis: { type: String, enum: ['yes', 'no'], required: true },
   diabetes: { type: String, enum: ['yes', 'no'], required: true },
   chronic_obstructive_pulmonary_disorder: { type: String, enum: ['yes', 'no'], required: true },
+  emergencyContacts: [
+    {
+      name: { type: String, default: "Emergency Contact 1" },
+      phone: { type: String, required: true, match: /^\d{10}$/ },
+    },
+    {
+      name: { type: String, default: "Emergency Contact 2" },
+      phone: { type: String, required: true, match: /^\d{10}$/ },
+    },
+  ],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 }, { strict: false }); // THIS LINE IS THE FIX
